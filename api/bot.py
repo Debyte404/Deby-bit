@@ -7,6 +7,8 @@ from shortner import shorten_url
 import logging
 import sys
 
+from http.server import BaseHTTPRequestHandler
+
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 #loads environment variables
 # load_dotenv()
@@ -45,4 +47,14 @@ async def circumcised(client, message):
         print(e)
         await message.reply("Use it like this : /url www.example.com")
 
-app.run()
+# app.run()
+# Define the HTTP handler
+class handler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        app.run()
+
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+        self.wfile.write('Hello, world!'.encode('utf-8'))
