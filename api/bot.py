@@ -7,7 +7,7 @@ from shortner import shorten_url
 import logging
 import sys
 
-from http.server import BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 #loads environment variables
@@ -51,10 +51,24 @@ async def circumcised(client, message):
 # Define the HTTP handler
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
-        app.run()
+        try:
+            app.run()
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b'OK')
+        except Exception as e:
+            logger.error(f"Error handling POST request: {e}")
+            self.send_response(500)
+            self.end_headers()
+            self.wfile.write(b'Internal Server Error')
 
     def do_GET(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
         self.wfile.write('Hello, world!'.encode('utf-8'))
+
+if __name__ == "__main__":
+    server = HTTPServer(('0.0.0.0', int(os.getenv('PORT', 8000))), handler)
+    logger.info("Starting server at port 8000")
+    server.serve_forever()
